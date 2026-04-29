@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戰馬極速灌籃 - 快速補充能量</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-layer">
+            <h1>戰馬能量：馬到成功</h1>
+            <div class="light-container">
+                <div class="light" id="light-1"></div>
+                <div class="light" id="light-2"></div>
+                <div class="light" id="light-3"></div>
+                <div class="light" id="light-basket">🏀</div>
+            </div>
+            <div class="score-board">高度: <span id="score">0</span> m</div>
+            <div id="energy-status">收集能量罐以點亮霓虹燈！</div>
+            <div class="energy-bar"><div id="energy-fill"></div></div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
