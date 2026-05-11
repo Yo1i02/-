@@ -138,6 +138,28 @@ function spawnRandomCans(scene, group, sw, sh, keys, count) {
         }
     }
 }
+/*背景更換*/
+const gameContainer = document.getElementById('game-container');
+const nextStageButton = document.getElementById('next-stage');
+
+let currentStage = 1;
+
+nextStageButton.addEventListener('click', () => {
+    // 更換背景
+    currentStage++;
+    if (currentStage > 2) currentStage = 1; // 假設有兩個背景圖片
+
+    // 首先將背景模糊顯示
+    gameContainer.style.filter = 'blur(5px)';
+    
+    setTimeout(() => {
+        // 更新背景圖片
+        gameContainer.style.backgroundImage = `url('background${currentStage}.jpg')`;
+        // 刪除模糊效果
+        gameContainer.style.filter = 'blur(0)';
+    }, 1000); // 1000ms後更換背景
+});
+
 
 function update() {
     if (ball && ball.body && ball.active) {
