@@ -2,7 +2,7 @@
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
-let currentBounce = 0.4; 
+let currentBounce = 0.4; // 回到你原本設定的 0.4
 let collectedCans = 0;
 const canKeys = ['can_red', 'can_blue', 'can_green', 'can_yellow'];
 
@@ -55,7 +55,7 @@ function create() {
         ball.setPosition(sw * 0.5, sh * 0.85);
         ball.body.setVelocity(0, 0);
         ball.body.setAngularVelocity(0);
-        currentBounce = 0.3;
+        currentBounce = 0.4; // 回到原本重置時的設定
         ball.body.setBounce(currentBounce);
         ball.setActive(true).setVisible(true);
     };
@@ -79,7 +79,7 @@ function create() {
         canObj.destroy();
         collectedCans++;
         updateLights();
-        currentBounce = Math.min(currentBounce + 0.35, 1.5);
+        currentBounce = Math.min(currentBounce + 0.35, 1.5); // 原本的增加幅度
         ball.body.setBounce(currentBounce);
         ball.setTint(0xffcc00);
         this.time.delayedCall(200, () => ball.clearTint());
@@ -97,12 +97,23 @@ function create() {
                 if (scoreText) scoreText.innerText = score;
                 statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
+                // --- 增加：高度 5 通關跳轉功能 ---
+                if (score === 5) {
+                    this.time.delayedCall(500, () => {
+                        if (confirm("恭喜通關！是否接收能量？")) {
+                            window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                        }
+                    });
+                }
+                // ----------------------------
+
                 this.time.delayedCall(1200, () => {
                     cans.clear(true, true); 
                     spawnRandomCans(this, cans, sw, sh, canKeys, 3);
                     collectedCans = 0;
                     updateLights(); 
                     resetBallPos();
+                    document.getElementById('light-basket').classList.remove('active');
                 });
             } else {
                 statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
@@ -111,7 +122,7 @@ function create() {
         }
     });
 
-    // 5. 滑鼠控制
+    // 5. 滑鼠控制 (完全保留你原本的 dx * 3.5 設定)
     this.input.on('pointerdown', (pointer) => {
         startX = pointer.x;
         startY = pointer.y;
@@ -138,28 +149,6 @@ function spawnRandomCans(scene, group, sw, sh, keys, count) {
         }
     }
 }
-/*背景更換*/
-const gameContainer = document.getElementById('game-container');
-const nextStageButton = document.getElementById('next-stage');
-
-let currentStage = 1;
-
-nextStageButton.addEventListener('click', () => {
-    // 更換背景
-    currentStage++;
-    if (currentStage > 2) currentStage = 1; // 假設有兩個背景圖片
-
-    // 首先將背景模糊顯示
-    gameContainer.style.filter = 'blur(5px)';
-    
-    setTimeout(() => {
-        // 更新背景圖片
-        gameContainer.style.backgroundImage = `url('background${currentStage}.jpg')`;
-        // 刪除模糊效果
-        gameContainer.style.filter = 'blur(0)';
-    }, 1000); // 1000ms後更換背景
-});
-
 
 function update() {
     if (ball && ball.body && ball.active) {
