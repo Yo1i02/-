@@ -2,7 +2,7 @@
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
-let currentBounce = 0.3; 
+let currentBounce = 0.4; 
 let collectedCans = 0;
 const canKeys = ['can_red', 'can_blue', 'can_green', 'can_yellow'];
 
@@ -79,7 +79,7 @@ function create() {
         canObj.destroy();
         collectedCans++;
         updateLights();
-        currentBounce = Math.min(currentBounce + 0.3, 1.2);
+        currentBounce = Math.min(currentBounce + 0.35, 1.5);
         ball.body.setBounce(currentBounce);
         ball.setTint(0xffcc00);
         this.time.delayedCall(200, () => ball.clearTint());
