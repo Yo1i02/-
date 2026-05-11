@@ -151,7 +151,15 @@ body {
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     overflow: hidden;
+    
+    /* ... 保持原本的寬高與定位設定 ... */
+    background-image: url(bg1.jpg); /* 初始背景 */
+    /*background-size: cover;    /* 💡 重要：這能防止變形，會自動裁切多餘部分 */
+    background-position: center; /* 💡 重要：確保背景圖永遠居中 */
+    background-repeat: no-repeat;
+    transition: background-image 0.5s ease-in-out; /* 換關時平滑淡入 */
 }
+
 
 /* 修正 UI 層，不要讓它擋住操作 */
 #ui-layer {
