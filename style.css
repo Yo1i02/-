@@ -17,32 +17,45 @@ body {
     position: relative;
     background-color: #000;
     /* 這裡要跟檔案列表一樣大寫 */
-    background-image: url(「底11.jpg);
+    background-image: url(bg1.jpg);
     background-size: cover;
     background-position: center;
     border: 6px solid #dd006f;
     border-radius: 30px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     overflow: hidden;
-    transition: background-image 1s ease-in-out; /* 過渡效果 */
-}
-
-#background {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    background-image: url(bg1.jpg); /* 這是初始背景 */
     background-size: cover;
     background-position: center;
-    filter: blur(0); /* 初始不模糊 */
-    transition: filter 1s ease-in-out, opacity 1s ease-in-out;
-    opacity: 1; /* 初始不透明度 */
+    transition: background-image 0.5s ease-in-out; /* 增加換圖時的淡入淡出感 */
 }
 
-.hidden {
-    opacity: 0; /* 隱藏的背景透明度 */
+
+
+.instruction-text {
+    position: absolute;  /* 絕對定位 */
+    bottom: 12px;        /* 強制距離底部 12 像素 */
+    left: 50%;           /* 移動到橫向 50% 的位置 */
+    transform: translateX(-50%); /* 往左回推一半，達成完美置中 */
+    
+    width: 100%;
+    white-space: nowrap; /* 確保文字不會因為寬度問題而換行 */
+    color: #ffffff;
+    font-size: 13px;
+    text-align: center;
+    z-index: 999;        /* 數字調大，確保它在所有圖層的最上方 */
+    pointer-events: none; /* 讓點擊穿透文字，不影響投籃 */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8); /* 增加黑影，避免被粉色背景吃掉 */
+    /* ... 你原本的設定保持不變 ... */
+    transition: opacity 0.5s; /* 增加 0.5 秒淡出效果，比較生動 */
+    opacity: 1;
 }
+
+/* 當加上這個 class 時，文字會消失 */
+.instruction-text.hidden {
+    opacity: 0;
+}
+
 
 /*標題位置*/
 #ui-layer {
@@ -54,6 +67,7 @@ body {
     pointer-events: none; /* 點擊會穿透 UI 到底下的遊戲 */
     z-index: 10;
 }
+
 /*籃框*/
 .energy-bar {
     width: 200px;
@@ -110,14 +124,58 @@ body {
     background: #ffcc00;
     box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00;
 }
-.instruction-text {
+/*手機*/
+body {
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* 改為 min-height */
+    overflow: hidden;
+    font-family: sans-serif;
+}
+
+#game-container {
+    /* 調整為根據螢幕比例自適應 */
+    width: 95vw;          /* 手機版寬度佔滿 95% */
+    max-width: 450px;     /* 電腦版最大寬度 */
+    height: 92vh;         /* 高度佔滿螢幕 92% */
+    position: relative;
+    background-color: #000;
+    background-image: url(bg1.jpg);
+    background-size: 100% 100%; /* 強制背景鋪滿，不被裁切 */
+    background-position: center;
+    border: 4px solid #dd006f; /* 邊框稍微縮減，增加空間 */
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    overflow: hidden;
+}
+
+/* 修正 UI 層，不要讓它擋住操作 */
+#ui-layer {
     position: absolute;
-    bottom: 20px;       /* 距離底部 20 像素 */
-    width: 100%;        /* 寬度撐滿，以便置中 */
-    color: rgba(255, 255, 255, 0.8); /* 白色並帶一點透明度，看起來比較高級 */
-    font-size: 14px;    /* 小字尺寸 */
-    letter-spacing: 1px;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding-top: 10px;
     text-align: center;
-    pointer-events: none; /* 確保文字不會擋住手指操作球 */
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 加點陰影確保在淺色背景也看得到 */
+    color: white;
+    pointer-events: none;
+    z-index: 10;
+}
+
+h1 {
+    font-size: 1.5rem; /* 使用相對單位 */
+    margin: 10px 0;
+}
+
+.energy-bar {
+    width: 70%; /* 寬度改用百分比 */
+    max-width: 200px;
+    height: 15px;
+    background: rgba(255,255,255,0.3);
+    margin: 5px auto;
+    border-radius: 10px;
 }
