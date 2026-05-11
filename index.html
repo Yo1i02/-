@@ -1,93 +1,29 @@
-body {
-    margin: 0;
-    padding: 0;
-    background-color: #ffffff; /* 頁面背景白色 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戰馬極速灌籃 - 快速補充能量</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
 
-#game-container {
-    width: 90vw;
-    max-width: 400px;
-    height: 80vh;
-    max-height: 700px;
-    position: relative;
-    background-color: #000;
-    /* 這裡要跟檔案列表一樣大寫 */
-    background-image: url(「底11.jpg);
-    background-size: cover;
-    background-position: center;
-    border: 6px solid #dd006f;
-    border-radius: 30px;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-    overflow: hidden;
-}
-/*標題位置*/
-#ui-layer {
-    position: absolute;
-    top: 5px;
-    width: 100%;
-    text-align: center;
-    color: white;
-    pointer-events: none; /* 點擊會穿透 UI 到底下的遊戲 */
-    z-index: 10;
-}
-/*籃框*/
-.energy-bar {
-    width: 200px;
-    height: 20px;
-    background: rgba(255,255,255,0.3);
-    margin: 10px auto;
-    border-radius: 5px;
-}
+    <div id="game-container">
+        <div id="ui-layer">
+            <h1>戰馬能量：馬到成功</h1>
+            <div class="light-container">
+                <div class="light" id="light-1"></div>
+                <div class="light" id="light-2"></div>
+                <div class="light" id="light-3"></div>
+                <div class="light" id="light-basket">🏀</div>
+            </div>
+            <div class="score-board">高度: <span id="score">0</span> m</div>
+            <div id="energy-status">收集能量罐以點亮霓虹燈！</div>
+            <div class="energy-bar"><div id="energy-fill"></div></div>
+        </div>
+    </div>
 
-#energy-fill {
-    width: 0%;
-    height: 100%;
-    background: #ffcc00;
-    transition: width 0.3s;
-}
-.light-container {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    /* --- 調整這裡 --- */
-    margin-top: 5px;    /* 減少與頂部的距離 */
-    margin-bottom: 5px; /* 減少與下方文字的距離 */
-    
-    /* 如果你想讓它浮在標題上方或更靠頂端，可以使用負數 margin */
-    /* margin-top: -10px; */ 
-    
-    position: relative;
-    z-index: 100; /* 確保燈號不會被球遮住 */
-}
-
-.light {
-    width: 22px;  /* 稍微縮小一點點會顯得位置更高 */
-    height: 22px;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid #555;
-    transition: all 0.3s;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 12px;
-    color: white;
-}
-
-/* 點亮後的霓虹效果 (青色/藍色發光) */
-.light.active {
-    background: #00f2ff;
-    box-shadow: 0 0 15px #00f2ff, 0 0 25px #00f2ff;
-    border-color: #fff;
-}
-
-/* 籃框燈點亮 (金色發光) */
-#light-basket.active {
-    background: #ffcc00;
-    box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00;
-}
+    <script src="game.js"></script>
+</body>
+</html>
