@@ -110,3 +110,14 @@ body {
     background: #ffcc00;
     box-shadow: 0 0 15px #ffcc00, 0 0 25px #ffcc00;
 }
+.instruction-text {
+    position: absolute;
+    bottom: 20px;       /* 距離底部 20 像素 */
+    width: 100%;        /* 寬度撐滿，以便置中 */
+    color: rgba(255, 255, 255, 0.8); /* 白色並帶一點透明度，看起來比較高級 */
+    font-size: 14px;    /* 小字尺寸 */
+    letter-spacing: 1px;
+    text-align: center;
+    pointer-events: none; /* 確保文字不會擋住手指操作球 */
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5); /* 加點陰影確保在淺色背景也看得到 */
+}
