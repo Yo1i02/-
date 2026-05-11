@@ -115,17 +115,51 @@ function create() {
                     resetBallPos();
                     document.getElementById('light-basket').classList.remove('active');
                 });
+                // 在你的進球判定邏輯內
+                if (collectedCans >= 3) {
+                    document.getElementById('light-basket').classList.add('active');
+                    score++;
+                    if (scoreText) scoreText.innerText = score;
+                    statusText.innerText = "🏆 戰馬能量滿載！節點達成";
+
+                    // --- 新增：動態換背景邏輯 ---
+                    const container = document.getElementById('game-container');
+                    // 根據 score 分數切換圖片，例如 score 為 1 時換 bg1.jpg
+                    // 你可以準備 bg1.jpg, bg2.jpg, bg3.jpg, bg4.jpg, bg5.jpg
+                    if (score <= 5) {
+                        container.style.backgroundImage = `bg2.jpg`;
+                    }
+                    // -------------------------
+
+                    // 原有的高度 5 跳轉邏輯
+                    if (score === 5) {
+                        this.time.delayedCall(500, () => {
+                            if (confirm("恭喜通關！是否接收能量？")) {
+                                window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                            }
+                        });
+                    }
+
+                    // ... 其餘 resetBallPos 等邏輯 ...
+                }
             } else {
                 statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
                 this.time.delayedCall(800, () => resetBallPos());
             }
         }
+        
     });
 
-    // 5. 滑鼠控制 (完全保留你原本的 dx * 3.5 設定)
+        // 5. 滑鼠控制
     this.input.on('pointerdown', (pointer) => {
         startX = pointer.x;
         startY = pointer.y;
+
+        // --- 新增：碰到/點擊畫面時，隱藏字幕 ---
+        const guideText = document.getElementById('guide-text');
+        if (guideText) {
+            guideText.classList.add('hidden');
+        }
     });
 
     this.input.on('pointerup', (pointer) => {
