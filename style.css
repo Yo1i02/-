@@ -17,28 +17,28 @@ body {
     position: relative;
     background-color: #000;
     /* 這裡要跟檔案列表一樣大寫 */
-    background-color: #ffd5d5;
+    background-image: url(「底11.jpg);
     background-size: cover;
     background-position: center;
-    border: 6px solid #333;
+    border: 6px solid #dd006f;
     border-radius: 30px;
     box-shadow: 0 20px 50px rgba(0,0,0,0.3);
     overflow: hidden;
 }
-
+/*標題位置*/
 #ui-layer {
     position: absolute;
-    top: 20px;
+    top: 5px;
     width: 100%;
     text-align: center;
     color: white;
     pointer-events: none; /* 點擊會穿透 UI 到底下的遊戲 */
     z-index: 10;
 }
-
+/*籃框*/
 .energy-bar {
     width: 200px;
-    height: 10px;
+    height: 20px;
     background: rgba(255,255,255,0.3);
     margin: 10px auto;
     border-radius: 5px;
@@ -54,12 +54,20 @@ body {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin: 10px 0;
+    /* --- 調整這裡 --- */
+    margin-top: 5px;    /* 減少與頂部的距離 */
+    margin-bottom: 5px; /* 減少與下方文字的距離 */
+    
+    /* 如果你想讓它浮在標題上方或更靠頂端，可以使用負數 margin */
+    /* margin-top: -10px; */ 
+    
+    position: relative;
+    z-index: 100; /* 確保燈號不會被球遮住 */
 }
 
 .light {
-    width: 25px;
-    height: 25px;
+    width: 22px;  /* 稍微縮小一點點會顯得位置更高 */
+    height: 22px;
     border-radius: 50%;
     background: rgba(255, 255, 255, 0.2);
     border: 2px solid #555;
@@ -67,7 +75,8 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
+    color: white;
 }
 
 /* 點亮後的霓虹效果 (青色/藍色發光) */
