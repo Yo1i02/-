@@ -6,6 +6,16 @@ let currentBounce = 0.4; // 回到你原本設定的 0.4
 let collectedCans = 0;
 const canKeys = ['can_red', 'can_blue', 'can_green', 'can_yellow'];
 
+// 1. 在 create 函式最上方定義你的背景清單
+const bgList = [
+    '「底11.jpg', // 高度 0 (第一關)
+    'bg1.jpg',    // 高度 1 (第二關)
+    'bg2.jpg',    // 高度 2
+    'bg3.jpg',    // 高度 3
+    'bg4.jpg',    // 高度 4
+    'bg5.jpg'     // 高度 5 (通關)
+    ];
+
 const initGame = () => {
     const container = document.getElementById('game-container');
     const cw = container.clientWidth || 375;
@@ -87,68 +97,56 @@ function create() {
     });
 
     // 4. 碰撞邏輯：籃框 (進球判定)
-    this.physics.add.overlap(ball, basketSensor, () => {
-        if (ball.body.velocity.y > 0 && ball.active) {
-            ball.setActive(false).setVisible(false);
+this.physics.add.overlap(ball, basketSensor, () => {
+    if (ball.body.velocity.y > 0 && ball.active) {
+        ball.setActive(false).setVisible(false);
 
-            if (collectedCans >= 3) {
-                document.getElementById('light-basket').classList.add('active');
-                score++;
-                if (scoreText) scoreText.innerText = score;
-                statusText.innerText = "🏆 戰馬能量滿載！節點達成";
+        if (collectedCans >= 3) {
+            document.getElementById('light-basket').classList.add('active');
+            score++;
+            if (scoreText) scoreText.innerText = score;
+            statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
-                // --- 增加：高度 5 通關跳轉功能 ---
-                if (score === 5) {
-                    this.time.delayedCall(500, () => {
-                        if (confirm("恭喜通關！是否接收能量？")) {
-                            window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
-                        }
-                    });
+            // --- 修改後的更換背景邏輯 (確保不變形且檔名正確) ---
+            const container = document.getElementById('game-container');
+            if (container) {
+                // 定義每一關的背景圖名 (請確保這些檔案存在且副檔名正確)
+                const bgs = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
+                
+                // 如果目前的 score 有對應的圖片
+                if (score < bgs.length) {
+                    container.style.backgroundImage = `url('${bgs[score]}')`;
+                    /*container.style.backgroundSize = "cover";      // 強制裁切鋪滿，防止擠壓變形
+                    container.style.backgroundPosition = "center"; // 確保圖片置中*/
+                    container.style.backgroundRepeat = "no-repeat";
+                    console.log("成功切換至高度 " + score + " 的背景: " + bgs[score]);
                 }
-                // ----------------------------
-
-                this.time.delayedCall(1200, () => {
-                    cans.clear(true, true); 
-                    spawnRandomCans(this, cans, sw, sh, canKeys, 3);
-                    collectedCans = 0;
-                    updateLights(); 
-                    resetBallPos();
-                    document.getElementById('light-basket').classList.remove('active');
-                });
-                // 在你的進球判定邏輯內
-                if (collectedCans >= 3) {
-                    document.getElementById('light-basket').classList.add('active');
-                    score++;
-                    if (scoreText) scoreText.innerText = score;
-                    statusText.innerText = "🏆 戰馬能量滿載！節點達成";
-
-                    // --- 新增：動態換背景邏輯 ---
-                    const container = document.getElementById('game-container');
-                    // 根據 score 分數切換圖片，例如 score 為 1 時換 bg1.jpg
-                    // 你可以準備 bg1.jpg, bg2.jpg, bg3.jpg, bg4.jpg, bg5.jpg
-                    if (score <= 5) {
-                        container.style.backgroundImage = `bg2.jpg`;
-                    }
-                    // -------------------------
-
-                    // 原有的高度 5 跳轉邏輯
-                    if (score === 5) {
-                        this.time.delayedCall(500, () => {
-                            if (confirm("恭喜通關！是否接收能量？")) {
-                                window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
-                            }
-                        });
-                    }
-
-                    // ... 其餘 resetBallPos 等邏輯 ...
-                }
-            } else {
-                statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
-                this.time.delayedCall(800, () => resetBallPos());
             }
+            // -------------------------------------------
+
+            // 高度 5 通關跳轉
+            if (score === 5) {
+                this.time.delayedCall(500, () => {
+                    if (confirm("恭喜通關！是否接收能量？")) {
+                        window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                    }
+                });
+            }
+
+            this.time.delayedCall(1200, () => {
+                cans.clear(true, true); 
+                spawnRandomCans(this, cans, sw, sh, canKeys, 3);
+                collectedCans = 0;
+                updateLights(); 
+                resetBallPos();
+                document.getElementById('light-basket').classList.remove('active');
+            });
+        } else {
+            statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
+            this.time.delayedCall(800, () => resetBallPos());
         }
-        
-    });
+    }
+});
 
         // 5. 滑鼠控制
     this.input.on('pointerdown', (pointer) => {
