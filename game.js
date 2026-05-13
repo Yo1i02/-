@@ -166,7 +166,7 @@ function spawnRandomCans(scene, group, sw, sh, keys, count) {
         let can = group.create(x, y, randomKey);
         if (can) {
             // 💡 縮放比例從 0.05 放大到 0.12，讓圖片變大
-            can.setScale(0.12); 
+            can.setScale(0.8); 
             
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
