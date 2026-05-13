@@ -166,14 +166,14 @@ function spawnRandomCans(scene, group, sw, sh, keys, count) {
         let can = group.create(x, y, randomKey);
         if (can) {
             // 💡 縮放比例從 0.05 放大到 0.12，讓圖片變大
-            can.setScale(0.8); 
+            can.setScale(0.08); 
             
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
             can.setDepth(5);
             
             // 💡 調整碰撞箱：讓罐子雖然看起來大，但球只要擦到邊就能收集
-            can.body.setSize(can.width * 0.7, can.height * 0.7);
+            can.body.setSize(can.width * 0.6, can.height * 0.6);
         }
     }
 }
