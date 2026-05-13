@@ -1,19 +1,10 @@
-// 定義全局變數，確保各個函數都能存取
+// 定義全局變數
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
-let currentBounce = 0.4; // 回到你原本設定的 0.4
+let currentBounce = 0.4; 
 let collectedCans = 0;
-const canKeys = ['can_red', 'can_blue', 'can_green', 'can_yellow'];
-
-// 1. 在 create 函式最上方定義你的背景清單
-const bgList = [
-    'bg1.jpg',    // 高度 1 (第二關)
-    'bg2.jpg',    // 高度 2
-    'bg3.jpg',    // 高度 3
-    'bg4.jpg',    // 高度 4
-    'bg5.jpg'     // 高度 5 (通關)
-    ];
+const canKeys = ['can_red', 'can_blue', 'can_green']; 
 
 const initGame = () => {
     const container = document.getElementById('game-container');
@@ -40,7 +31,11 @@ function preload() {
     this.load.image('can_red', '1.png');
     this.load.image('can_blue', '2.png');
     this.load.image('can_green', '3.png');
-
+    
+    // 音效預載
+    this.load.audio('sfx_bounce', 'bounce.mp3');
+    this.load.audio('sfx_goal', 'goal.mp3');
+    this.load.audio('sfx_fail', 'fail.mp3');
 }
 
 function create() {
@@ -64,7 +59,7 @@ function create() {
         ball.setPosition(sw * 0.5, sh * 0.85);
         ball.body.setVelocity(0, 0);
         ball.body.setAngularVelocity(0);
-        currentBounce = 0.4; // 回到原本重置時的設定
+        currentBounce = 0.4; 
         ball.body.setBounce(currentBounce);
         ball.setActive(true).setVisible(true);
     };
@@ -72,6 +67,7 @@ function create() {
     // 1. 建立感應區與罐子群組
     basketSensor = this.add.rectangle(sw / 2, sh * 0.3, 100, 20, 0xffffff, 0);
     this.physics.add.existing(basketSensor, true);
+    
     cans = this.physics.add.group();
     spawnRandomCans(this, cans, sw, sh, canKeys, 3);
 
@@ -88,7 +84,7 @@ function create() {
         canObj.destroy();
         collectedCans++;
         updateLights();
-        currentBounce = Math.min(currentBounce + 0.35, 1.5); // 原本的增加幅度
+        currentBounce = Math.min(currentBounce + 0.35, 1.5);
         ball.body.setBounce(currentBounce);
         ball.setTint(0xffcc00);
         this.time.delayedCall(200, () => ball.clearTint());
@@ -96,67 +92,57 @@ function create() {
     });
 
     // 4. 碰撞邏輯：籃框 (進球判定)
-this.physics.add.overlap(ball, basketSensor, () => {
-    if (ball.body.velocity.y > 0 && ball.active) {
-        ball.setActive(false).setVisible(false);
+    this.physics.add.overlap(ball, basketSensor, () => {
+        if (ball.body.velocity.y > 0 && ball.active) {
+            ball.setActive(false).setVisible(false);
 
-        if (collectedCans >= 3) {
-            document.getElementById('light-basket').classList.add('active');
-            score++;
-            if (scoreText) scoreText.innerText = score;
-            statusText.innerText = "🏆 戰馬能量滿載！節點達成";
+            if (collectedCans >= 3) {
+                document.getElementById('light-basket').classList.add('active');
+                score++;
+                if (scoreText) scoreText.innerText = score;
+                statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
-            // --- 修改後的更換背景邏輯 (確保不變形且檔名正確) ---
-            const container = document.getElementById('game-container');
-            if (container) {
-                // 定義每一關的背景圖名 (請確保這些檔案存在且副檔名正確)
-                const bgs = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
-                
-                // 如果目前的 score 有對應的圖片
-                if (score < bgs.length) {
-                    container.style.backgroundImage = `url('${bgs[score]}')`;
-                    /*container.style.backgroundSize = "cover";      // 強制裁切鋪滿，防止擠壓變形
-                    container.style.backgroundPosition = "center"; // 確保圖片置中*/
-                    container.style.backgroundRepeat = "no-repeat";
-                    console.log("成功切換至高度 " + score + " 的背景: " + bgs[score]);
-                }
-            }
-            // -------------------------------------------
-
-            // 高度 5 通關跳轉
-            if (score === 5) {
-                this.time.delayedCall(500, () => {
-                    if (confirm("恭喜通關！是否接收能量？")) {
-                        window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                // --- 背景更換：保持擠壓模式 ---
+                const container = document.getElementById('game-container');
+                if (container) {
+                    const bgs = ['「底11.jpg', 'bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
+                    if (score < bgs.length) {
+                        container.style.backgroundImage = `url('${bgs[score]}')`;
+                        container.style.backgroundSize = "100% 100%"; 
+                        container.style.backgroundPosition = "center";
+                        container.style.backgroundRepeat = "no-repeat";
                     }
+                }
+
+                if (score === 5) {
+                    this.time.delayedCall(500, () => {
+                        if (confirm("恭喜通關！是否接收能量？")) {
+                            window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                        }
+                    });
+                }
+
+                this.time.delayedCall(1200, () => {
+                    cans.clear(true, true); 
+                    spawnRandomCans(this, cans, sw, sh, canKeys, 3);
+                    collectedCans = 0;
+                    updateLights(); 
+                    resetBallPos();
+                    document.getElementById('light-basket').classList.remove('active');
                 });
+            } else {
+                statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
+                this.time.delayedCall(800, () => resetBallPos());
             }
-
-            this.time.delayedCall(1200, () => {
-                cans.clear(true, true); 
-                spawnRandomCans(this, cans, sw, sh, canKeys, 3);
-                collectedCans = 0;
-                updateLights(); 
-                resetBallPos();
-                document.getElementById('light-basket').classList.remove('active');
-            });
-        } else {
-            statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
-            this.time.delayedCall(800, () => resetBallPos());
         }
-    }
-});
+    });
 
-        // 5. 滑鼠控制
+    // 5. 控制邏輯
     this.input.on('pointerdown', (pointer) => {
         startX = pointer.x;
         startY = pointer.y;
-
-        // --- 新增：碰到/點擊畫面時，隱藏字幕 ---
         const guideText = document.getElementById('guide-text');
-        if (guideText) {
-            guideText.classList.add('hidden');
-        }
+        if (guideText) guideText.classList.add('hidden');
     });
 
     this.input.on('pointerup', (pointer) => {
@@ -166,17 +152,28 @@ this.physics.add.overlap(ball, basketSensor, () => {
     });
 }
 
+// --- 核心修正：加大罐子圖片並防止消失 ---
 function spawnRandomCans(scene, group, sw, sh, keys, count) {
+    group.clear(true, true); 
     for (let i = 0; i < count; i++) {
         let randomKey = Phaser.Utils.Array.GetRandom(keys);
-        let x = Phaser.Math.Between(80, sw - 80);
-        let y = Phaser.Math.Between(sh * 0.35, sh * 0.6);
+        
+        // 分段生成 y 座標，確保三個罐子垂直拉開，不會重疊
+        let x = Phaser.Math.Between(100, sw - 100);
+        let segmentHeight = (sh * 0.25) / count; 
+        let y = (sh * 0.38) + (segmentHeight * i) + Phaser.Math.Between(0, 20);
+        
         let can = group.create(x, y, randomKey);
         if (can) {
-            can.setScale(0.05); 
+            // 💡 縮放比例從 0.05 放大到 0.12，讓圖片變大
+            can.setScale(0.12); 
+            
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
             can.setDepth(5);
+            
+            // 💡 調整碰撞箱：讓罐子雖然看起來大，但球只要擦到邊就能收集
+            can.body.setSize(can.width * 0.7, can.height * 0.7);
         }
     }
 }
