@@ -1,13 +1,10 @@
-// 1. 全局變數定義
+// 定義全局變數，確保各個函數都能存取
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
 let currentBounce = 0.4; 
 let collectedCans = 0;
 const canKeys = ['can_red', 'can_blue', 'can_green']; 
-
-// 音效變數
-let sfxBounce, sfxGoal, sfxCollect;
 
 const initGame = () => {
     const container = document.getElementById('game-container');
@@ -30,22 +27,15 @@ const initGame = () => {
 };
 
 function preload() {
-    // 💡 確保圖片路徑與大小寫正確
     this.load.image('basketballKey', 'IMG_0076.PNG');
     this.load.image('can_red', '1.png');
     this.load.image('can_blue', '2.png');
     this.load.image('can_green', '3.png');
     
-    // --- 音效預載 (加上保護機制) ---
-    // 如果這三個檔案還沒準備好，遊戲也不會卡死
-    this.load.audio('sfx_bounce', 'bounce.mp3');   
-    this.load.audio('sfx_goal', 'goal.mp3');       
-    this.load.audio('sfx_collect', 'collect.mp3'); 
-
-    // 監聽載入錯誤，防止當機
-    this.load.on('loaderror', (file) => {
-        console.warn('資源載入失敗，跳過: ' + file.src);
-    });
+    // 音效預載
+    this.load.audio('sfx_bounce', 'bounce.mp3');
+    this.load.audio('sfx_goal', 'goal.mp3');
+    this.load.audio('sfx_fail', 'fail.mp3');
 }
 
 function create() {
@@ -54,11 +44,6 @@ function create() {
 
     scoreText = document.getElementById('score');
     statusText = document.getElementById('energy-status');
-
-    // --- 安全初始化音效 (檢查檔案是否存在才建立) ---
-    if (this.cache.audio.exists('sfx_bounce')) sfxBounce = this.sound.add('sfx_bounce', { volume: 0.5 });
-    if (this.cache.audio.exists('sfx_goal')) sfxGoal = this.sound.add('sfx_goal', { volume: 0.8 });
-    if (this.cache.audio.exists('sfx_collect')) sfxCollect = this.sound.add('sfx_collect', { volume: 0.6 });
 
     // 內部輔助：燈號更新
     const updateLights = () => {
@@ -71,7 +56,6 @@ function create() {
 
     // 內部輔助：重置球
     const resetBallPos = () => {
-        if (!ball) return;
         ball.setPosition(sw * 0.5, sh * 0.85);
         ball.body.setVelocity(0, 0);
         ball.body.setAngularVelocity(0);
@@ -87,25 +71,17 @@ function create() {
     cans = this.physics.add.group();
     spawnRandomCans(this, cans, sw, sh, canKeys, 3);
 
-    // 2. 建立球 (加入判斷確保球體建立成功)
+    // 2. 建立球
     ball = this.add.image(sw * 0.5, sh * 0.85, 'basketballKey');
     ball.setScale((sw * 0.18) / ball.width);
     this.physics.add.existing(ball);
     ball.body.setCircle(ball.width / 2);
     ball.body.setCollideWorldBounds(true);
     ball.body.setBounce(currentBounce);
-    ball.setDepth(10); // 確保在最上層
-
-    // 牆壁碰撞音效
-    ball.body.onWorldBounds = true;
-    this.physics.world.on('worldbounds', () => {
-        if (sfxBounce && ball.active) sfxBounce.play();
-    });
 
     // 3. 碰撞邏輯：罐子
     this.physics.add.overlap(ball, cans, (ballObj, canObj) => {
         canObj.destroy();
-        if (sfxCollect) sfxCollect.play(); 
         collectedCans++;
         updateLights();
         currentBounce = Math.min(currentBounce + 0.35, 1.5);
@@ -121,12 +97,12 @@ function create() {
             ball.setActive(false).setVisible(false);
 
             if (collectedCans >= 3) {
-                if (sfxGoal) sfxGoal.play(); 
                 document.getElementById('light-basket').classList.add('active');
                 score++;
                 if (scoreText) scoreText.innerText = score;
                 statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
+                // --- 背景更換：保持擠壓模式 ---
                 const container = document.getElementById('game-container');
                 if (container) {
                     const bgs = ['「底11.jpg', 'bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
@@ -161,7 +137,7 @@ function create() {
         }
     });
 
-    // 5. 控制邏輯 (修正球沒反應的問題)
+    // 5. 控制邏輯
     this.input.on('pointerdown', (pointer) => {
         startX = pointer.x;
         startY = pointer.y;
@@ -170,33 +146,33 @@ function create() {
     });
 
     this.input.on('pointerup', (pointer) => {
-        if (!ball.active) return; // 球不可見時不觸發
         const dx = startX - pointer.x;
         const dy = startY - pointer.y;
-        
-        // 💡 增加力量上限限制，防止球飛太遠
-        const forceX = Phaser.Math.Clamp(dx * 3.5, -600, 600);
-        const forceY = Phaser.Math.Clamp((dy * 3.5) - 50, -1200, -300);
-        
-        ball.body.setVelocity(forceX, forceY);
-        if (sfxBounce) sfxBounce.play(); 
+        ball.body.setVelocity(dx * 3.5, (dy * 3.5) - 50);
     });
 }
 
+// 罐子生成函式
 function spawnRandomCans(scene, group, sw, sh, keys, count) {
     group.clear(true, true); 
     for (let i = 0; i < count; i++) {
         let randomKey = Phaser.Utils.Array.GetRandom(keys);
-        let x = Phaser.Math.Between(80, sw - 80);
-        let segmentHeight = (sh * 0.22) / count; 
+        
+        // 分段生成 y 座標，確保三個罐子不會完全重疊
+        let x = Phaser.Math.Between(100, sw - 100);
+        let segmentHeight = (sh * 0.25) / count; 
         let y = (sh * 0.38) + (segmentHeight * i) + Phaser.Math.Between(0, 20);
         
         let can = group.create(x, y, randomKey);
         if (can) {
+            // 💡 調整縮放比例為 0.08（原本 0.12 縮小一點）
             can.setScale(0.08); 
+            
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
             can.setDepth(5);
+            
+            // 保持較寬鬆的碰撞判定，讓球容易收集
             can.body.setSize(can.width * 0.8, can.height * 0.8);
         }
     }
