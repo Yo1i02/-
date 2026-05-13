@@ -1,4 +1,4 @@
-// 定義全局變數
+// 定義全局變數，確保各個函數都能存取
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
@@ -152,28 +152,28 @@ function create() {
     });
 }
 
-// --- 核心修正：加大罐子圖片並防止消失 ---
+// 罐子生成函式
 function spawnRandomCans(scene, group, sw, sh, keys, count) {
     group.clear(true, true); 
     for (let i = 0; i < count; i++) {
         let randomKey = Phaser.Utils.Array.GetRandom(keys);
         
-        // 分段生成 y 座標，確保三個罐子垂直拉開，不會重疊
+        // 分段生成 y 座標，確保三個罐子不會完全重疊
         let x = Phaser.Math.Between(100, sw - 100);
         let segmentHeight = (sh * 0.25) / count; 
         let y = (sh * 0.38) + (segmentHeight * i) + Phaser.Math.Between(0, 20);
         
         let can = group.create(x, y, randomKey);
         if (can) {
-            // 💡 縮放比例從 0.05 放大到 0.12，讓圖片變大
+            // 💡 調整縮放比例為 0.08（原本 0.12 縮小一點）
             can.setScale(0.08); 
             
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
             can.setDepth(5);
             
-            // 💡 調整碰撞箱：讓罐子雖然看起來大，但球只要擦到邊就能收集
-            can.body.setSize(can.width * 0.6, can.height * 0.6);
+            // 保持較寬鬆的碰撞判定，讓球容易收集
+            can.body.setSize(can.width * 0.8, can.height * 0.8);
         }
     }
 }
