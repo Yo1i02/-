@@ -8,7 +8,6 @@ const canKeys = ['can_red', 'can_blue', 'can_green', 'can_yellow'];
 
 // 1. 在 create 函式最上方定義你的背景清單
 const bgList = [
-    '「底11.jpg', // 高度 0 (第一關)
     'bg1.jpg',    // 高度 1 (第二關)
     'bg2.jpg',    // 高度 2
     'bg3.jpg',    // 高度 3
@@ -38,10 +37,10 @@ const initGame = () => {
 
 function preload() {
     this.load.image('basketballKey', 'IMG_0076.PNG');
-    this.load.image('can_red', '1.PNG');
-    this.load.image('can_blue', '2.PNG');
-    this.load.image('can_green', '3.PNG');
-    this.load.image('can_yellow', '4.PNG');
+    this.load.image('can_red', '1.png');
+    this.load.image('can_blue', '2.png');
+    this.load.image('can_green', '3.png');
+
 }
 
 function create() {
