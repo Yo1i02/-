@@ -9,7 +9,7 @@ const canKeys = ['can_red', 'can_blue', 'can_green'];
 // 背景清單
 const bgs = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg', 'bg6.jpg'];
 
-// 💡 過場動畫 LOGO 清單 (請確保檔案名稱為 LOGO1.png ~ LOGO6.png，或依實際名稱修改)
+// 過場動畫 LOGO 清單
 const logos = ['LOGO1.png', 'LOGO2.png', 'LOGO3.png', 'LOGO4.png', 'LOGO5.png', 'LOGO6.png'];
 
 const initGame = () => {
@@ -38,7 +38,7 @@ function preload() {
     this.load.image('can_blue', '2.png');
     this.load.image('can_green', '3.png');
     
-    // 💡 預載 6 個過場 LOGO
+    // 預載 6 個過場 LOGO
     for(let i=1; i<=6; i++) {
         this.load.image(`logo_step_${i}`, `LOGO${i}.png`);
     }
@@ -61,18 +61,16 @@ function create() {
     }
 
     // 內部輔助：過場動畫功能
-    // 💡 當過關時呼叫，傳入目前的 score (0~5)
     const playClearTransition = (scene, currentScore) => {
-        // 根據目前的 score 抓取對應的 LOGO (例如 score 0 過關顯示 LOGO1)
         const logoImg = scene.add.image(sw / 2, sh / 2, `logo_step_${currentScore + 1}`);
-        logoImg.setDepth(100); // 確保在最前面
+        logoImg.setDepth(100); 
         logoImg.setScale(0);   // 從 0 開始縮放
         logoImg.setAlpha(0);   // 從透明開始
 
         // 動畫序列
         scene.tweens.add({
             targets: logoImg,
-            scale: 0.8,        // 放大到 0.8 倍
+            scale: 1.3,        // 💡 這裡放大了！從原本的 0.8 改為 1.3 倍（可視需求自行微調）
             alpha: 1,          // 變為不透明
             duration: 600,     // 出現花費 0.6 秒
             ease: 'Back.easeOut',
@@ -80,12 +78,12 @@ function create() {
                 // 停留一秒後消失
                 scene.tweens.add({
                     targets: logoImg,
-                    scale: 1.2, // 稍微再變大一點點
+                    scale: 1.6, // 💡 消失前最後膨脹的比例也同步微調大一點
                     alpha: 0,   // 淡出
                     delay: 800, // 停留 0.8 秒後開始淡出
                     duration: 500,
                     onComplete: () => {
-                        logoImg.destroy(); // 銷毀物件
+                        logoImg.destroy(); 
                     }
                 });
             }
@@ -148,18 +146,15 @@ function create() {
         });
     });
 
-    // 4. 碰撞邏輯：籃框 (過場動畫觸發點)
+    // 4. 碰撞邏輯：籃框
     this.physics.add.overlap(ball, basketSensor, () => {
         if (ball.body.velocity.y > 0 && ball.active) {
             ball.setActive(false).setVisible(false);
 
             if (collectedCans >= 3) {
-                // 💡 執行過場動畫
                 playClearTransition(this, score);
-
                 document.getElementById('light-basket').classList.add('active');
                 
-                // 延遲更新背景與生成新罐子，確保動畫播放中途才換背景
                 this.time.delayedCall(1000, () => {
                     score++;
                     if (scoreText) scoreText.innerText = score;
@@ -168,7 +163,6 @@ function create() {
                         container.style.backgroundImage = `url('${bgs[score]}')`;
                     }
 
-                    // 通關判斷
                     if (score === 5) {
                         this.time.delayedCall(1000, () => {
                             if (confirm("恭喜通關！是否接收能量？")) {
@@ -178,7 +172,6 @@ function create() {
                     }
                 });
 
-                // 稍微拉長重置時間，讓玩家看完動畫
                 this.time.delayedCall(2000, () => {
                     cans.clear(true, true); 
                     spawnRandomCans(this, cans, sw, sh, canKeys, 3);
