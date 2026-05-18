@@ -9,14 +9,8 @@ const canKeys = ['can_red', 'can_blue', 'can_green'];
 // 背景清單
 const bgs = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg', 'bg6.jpg'];
 
-// 💡 隨機鼓勵語句清單 (可自行修改或增加內容)
-const praiseTexts = [
-    '戰馬能量 突破極限！',
-    '超感爆發 太神啦！',
-    '狀態拉滿 勢不可擋！',
-    '完美節點 能量補給！',
-    '神射手降臨 衝啊！'
-];
+// 過場動畫 LOGO 清單
+const logos = ['LOGO1.png', 'LOGO2.png', 'LOGO3.png', 'LOGO4.png', 'LOGO5.png', 'LOGO6.png'];
 
 const initGame = () => {
     const container = document.getElementById('game-container');
@@ -66,13 +60,14 @@ function create() {
         container.style.backgroundRepeat = "no-repeat";
     }
 
-    // 內部輔助：過場動畫功能 (已更新為你最終修改的節奏數值)
+    // 內部輔助：過場動畫功能 (維持你調整後的最終完美數值)
     const playClearTransition = (scene, currentScore) => {
         const logoImg = scene.add.image(sw / 2, sh / 2, `logo_step_${currentScore + 1}`);
         logoImg.setDepth(100); 
-        logoImg.setScale(0);   
-        logoImg.setAlpha(0);   
+        logoImg.setScale(0);   // 從 0 開始縮放
+        logoImg.setAlpha(0);   // 從透明開始
 
+        // 動畫序列
         scene.tweens.add({
             targets: logoImg,
             scale: 0.5,        
@@ -80,6 +75,7 @@ function create() {
             duration: 400,     
             ease: 'Back.easeOut',
             onComplete: () => {
+                // 停留後消失
                 scene.tweens.add({
                     targets: logoImg,
                     scale: 0.8, 
@@ -92,36 +88,6 @@ function create() {
                 });
             }
         });
-
-        // --- 💡 這裡新增：進球過關時的鼓勵語句彈幕 ---
-        // 隨機抽選一句話
-        const randomPraise = Phaser.Utils.Array.GetRandom(praiseTexts);
-        
-        // 產生在畫面中間稍微偏上方的位置 (sh * 0.4)，避免完全擋住 LOGO
-        let praisePopup = scene.add.text(sw / 2, sh * 0.4, randomPraise, {
-            fontSize: '20px',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold',
-            fill: '#ffaa00', 
-            stroke: '#331100', 
-            strokeThickness: 4
-        });
-        praisePopup.setOrigin(0.5);
-        praisePopup.setDepth(105); // 層級比 LOGO 再稍微高一點點
-
-        // 鼓勵文字的飄移與淡出動畫
-        scene.tweens.add({
-            targets: praisePopup,
-            y: (sh * 0.4) - 60,    // 向上飄移 60 像素
-            alpha: 0,              // 變透明
-            delay: 200,            // 稍微延遲一點點跑出來，跟 LOGO 錯開
-            duration: 900,         // 飄浮持續 0.9 秒
-            ease: 'Cubic.easeOut',
-            onComplete: () => {
-                praisePopup.destroy(); // 銷毀釋放記憶體
-            }
-        });
-        // ---------------------------------------------------
     };
 
     const updateLights = () => {
@@ -217,6 +183,32 @@ function create() {
                 });
             } else {
                 statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
+
+                // --- 💡 這裡新增：進球但沒過關時，在畫面中央彈出鼓勵彈幕 ---
+                let retryText = this.add.text(sw / 2, sh / 2, '再加油一下!快成功了!', {
+                    fontSize: '20px',
+                    fontFamily: 'Arial, sans-serif',
+                    fontWeight: 'bold',
+                    fill: '#ffaa00',       // 金黃色稍橘
+                    stroke: '#331100',     // 深焦糖色邊框
+                    strokeThickness: 4
+                });
+                retryText.setOrigin(0.5);
+                retryText.setDepth(15);    // 確保在上方
+
+                // 彈幕往上飄移淡出動畫
+                this.tweens.add({
+                    targets: retryText,
+                    y: (sh / 2) - 60,      // 往上飄移 60 像素
+                    alpha: 0,              // 漸變至完全透明
+                    duration: 1000,        // 持續 1 秒
+                    ease: 'Cubic.easeOut',
+                    onComplete: () => {
+                        retryText.destroy(); // 銷毀物件
+                    }
+                });
+                // -------------------------------------------------------------
+
                 this.time.delayedCall(800, () => resetBallPos());
             }
         }
