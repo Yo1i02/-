@@ -6,6 +6,11 @@ let currentBounce = 0.4;
 let collectedCans = 0;
 const canKeys = ['can_red', 'can_blue', 'can_green']; 
 
+// 💡 重新整理背景圖片陣列，讓 score 對應正確的圖片
+// score = 0 對應 bgs[0] ('bg1.jpg')
+// score = 1 對應 bgs[1] ('bg2.jpg') ... 依此類推至 score = 5
+const bgs = ['bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg', 'bg6.jpg'];
+
 const initGame = () => {
     const container = document.getElementById('game-container');
     const cw = container.clientWidth || 375;
@@ -32,8 +37,6 @@ function preload() {
     this.load.image('can_red', '1.png');
     this.load.image('can_blue', '2.png');
     this.load.image('can_green', '3.png');
-    
-    // 💡 已完全移除音效的預載邏輯
 }
 
 function create() {
@@ -48,6 +51,15 @@ function create() {
 
     scoreText = document.getElementById('score');
     statusText = document.getElementById('energy-status');
+
+    // 💡 【新增邏輯】遊戲初始化（高度 0）時，立即強制載入第一張背景 bg1.jpg
+    const container = document.getElementById('game-container');
+    if (container) {
+        container.style.backgroundImage = `url('${bgs[0]}')`;
+        container.style.backgroundSize = "100% 100%"; 
+        container.style.backgroundPosition = "center";
+        container.style.backgroundRepeat = "no-repeat";
+    }
 
     // 內部輔助：燈號更新
     const updateLights = () => {
@@ -84,12 +96,11 @@ function create() {
         ball.body.setCircle(ball.width / 2);
         ball.body.setCollideWorldBounds(true);
         ball.body.setBounce(currentBounce);
-        ball.setDepth(10); // 💡 確保球不會被背景擋住
+        ball.setDepth(10); // 確保球不會被背景擋住
     }
 
-    // 3. 碰撞邏輯：罐子 (在此處加入彈幕提示)
+    // 3. 碰撞邏輯：罐子
     this.physics.add.overlap(ball, cans, (ballObj, canObj) => {
-        // 儲存被碰撞罐子的座標，做為彈幕文字的起點
         const canX = canObj.x;
         const canY = canObj.y;
 
@@ -102,8 +113,7 @@ function create() {
         this.time.delayedCall(200, () => ball.clearTint());
         statusText.innerText = `⚡ 點亮第 ${collectedCans} 顆能量燈！`;
 
-        // --- 💡 這裡新增「彈力 +30%」金黃色稍橘飄浮文字提示 ---
-        // fill: '#ffaa00' (金黃偏橘), stroke: 深色描邊確保在任何背景都清晰
+        // 「彈力 +30%」金黃色稍橘飄浮文字提示
         let popupText = this.add.text(canX, canY - 20, '彈力 +30%', {
             fontSize: '20px',
             fontFamily: 'Arial, sans-serif',
@@ -113,20 +123,18 @@ function create() {
             strokeThickness: 4
         });
         popupText.setOrigin(0.5); 
-        popupText.setDepth(15);    // 確保字體在最上層
+        popupText.setDepth(15);    
 
-        // 文字向上飄移並淡出的動畫效果
         this.tweens.add({
             targets: popupText,
-            y: canY - 80,          // 向上飄移 60 像素
-            alpha: 0,              // 漸變至完全透明
-            duration: 800,         // 動畫持續 0.8 秒
+            y: canY - 80,          
+            alpha: 0,              
+            duration: 800,         
             ease: 'Cubic.easeOut',
             onComplete: () => {
-                popupText.destroy(); // 動畫播放完畢後銷毀物件，避免佔用記憶體
+                popupText.destroy(); 
             }
         });
-        // ---------------------------------------------------
     });
 
     // 4. 碰撞邏輯：籃框 (進球判定)
@@ -136,17 +144,16 @@ function create() {
 
             if (collectedCans >= 3) {
                 document.getElementById('light-basket').classList.add('active');
-                score++;
+                score++; // 進球後 score 遞增
                 if (scoreText) scoreText.innerText = score;
                 statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
-                // --- 修改後的更換背景邏輯 (恢復擠壓模式) ---
-                const container = document.getElementById('game-container');
+                // --- 💡 這裡更改背景更換邏輯 ---
                 if (container) {
-                    const bgs = ['「底11.jpg', 'bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
+                    // 當 score 變為 1 時，載入 bgs[1] ('bg2.jpg')；當 score 變為 5 時，載入 bgs[5] ('bg6.jpg')
                     if (score < bgs.length) {
                         container.style.backgroundImage = `url('${bgs[score]}')`;
-                        container.style.backgroundSize = "100% 100%"; // 恢復擠壓
+                        container.style.backgroundSize = "100% 100%"; 
                         container.style.backgroundPosition = "center";
                         container.style.backgroundRepeat = "no-repeat";
                     }
@@ -189,7 +196,6 @@ function create() {
         const dx = startX - pointer.x;
         const dy = startY - pointer.y;
         
-        // 增加力量上限限制，保障遊戲操作體感
         const forceX = Phaser.Math.Clamp(dx * 3.5, -600, 600);
         const forceY = Phaser.Math.Clamp((dy * 3.5) - 50, -1200, -300);
         
@@ -197,7 +203,6 @@ function create() {
     });
 }
 
-// 罐子生成函式 (包含邊界限制與防重疊機制)
 function spawnRandomCans(scene, group, sw, sh, keys, count) {
     group.clear(true, true); 
     for (let i = 0; i < count; i++) {
@@ -209,11 +214,11 @@ function spawnRandomCans(scene, group, sw, sh, keys, count) {
         
         let can = group.create(x, y, randomKey);
         if (can) {
-            can.setScale(0.08); // 保持適中大小
+            can.setScale(0.08); 
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
             can.setDepth(5); 
-            can.body.setSize(can.width * 0.8, can.height * 0.8); // 優化碰撞範圍
+            can.body.setSize(can.width * 0.8, can.height * 0.8); 
         }
     }
 }
