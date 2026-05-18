@@ -1,4 +1,4 @@
-// 定義全局變數，確保各個函數都能存取
+// 1. 全局變數定義
 let ball, basketSensor, cans, score = 0;
 let scoreText, statusText;
 let startX, startY;
@@ -27,20 +27,24 @@ const initGame = () => {
 };
 
 function preload() {
+    // 優先載入圖片，確保遊戲本體能顯示
     this.load.image('basketballKey', 'IMG_0076.PNG');
     this.load.image('can_red', '1.png');
     this.load.image('can_blue', '2.png');
     this.load.image('can_green', '3.png');
     
-    // 音效預載
-    this.load.audio('sfx_bounce', 'bounce.mp3');
-    this.load.audio('sfx_goal', 'goal.mp3');
-    this.load.audio('sfx_fail', 'fail.mp3');
+    // 💡 已完全移除音效的預載邏輯
 }
 
 function create() {
     const sw = this.cameras.main.width;
     const sh = this.cameras.main.height;
+
+    // 💡 檢查寬高，防止在某些手機瀏覽器抓到 0
+    if (sw === 0 || sh === 0) {
+        console.error("偵測到螢幕寬高為 0，請重新整理");
+        return;
+    }
 
     scoreText = document.getElementById('score');
     statusText = document.getElementById('energy-status');
@@ -56,6 +60,7 @@ function create() {
 
     // 內部輔助：重置球
     const resetBallPos = () => {
+        if (!ball) return;
         ball.setPosition(sw * 0.5, sh * 0.85);
         ball.body.setVelocity(0, 0);
         ball.body.setAngularVelocity(0);
@@ -71,16 +76,23 @@ function create() {
     cans = this.physics.add.group();
     spawnRandomCans(this, cans, sw, sh, canKeys, 3);
 
-    // 2. 建立球
+    // 2. 建立球 (加上深度確保它在最前面)
     ball = this.add.image(sw * 0.5, sh * 0.85, 'basketballKey');
-    ball.setScale((sw * 0.18) / ball.width);
-    this.physics.add.existing(ball);
-    ball.body.setCircle(ball.width / 2);
-    ball.body.setCollideWorldBounds(true);
-    ball.body.setBounce(currentBounce);
+    if (ball) {
+        ball.setScale((sw * 0.18) / ball.width);
+        this.physics.add.existing(ball);
+        ball.body.setCircle(ball.width / 2);
+        ball.body.setCollideWorldBounds(true);
+        ball.body.setBounce(currentBounce);
+        ball.setDepth(10); // 💡 確保球不會被背景擋住
+    }
 
-    // 3. 碰撞邏輯：罐子
+    // 3. 碰撞邏輯：罐子 (在此處加入彈幕提示)
     this.physics.add.overlap(ball, cans, (ballObj, canObj) => {
+        // 儲存被碰撞罐子的座標，做為彈幕文字的起點
+        const canX = canObj.x;
+        const canY = canObj.y;
+
         canObj.destroy();
         collectedCans++;
         updateLights();
@@ -89,6 +101,32 @@ function create() {
         ball.setTint(0xffcc00);
         this.time.delayedCall(200, () => ball.clearTint());
         statusText.innerText = `⚡ 點亮第 ${collectedCans} 顆能量燈！`;
+
+        // --- 💡 這裡新增「彈力 +30%」金黃色稍橘飄浮文字提示 ---
+        // fill: '#ffaa00' (金黃偏橘), stroke: 深色描邊確保在任何背景都清晰
+        let popupText = this.add.text(canX, canY - 20, '彈力 +30%', {
+            fontSize: '20px',
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            fill: '#ffaa00', 
+            stroke: '#331100', 
+            strokeThickness: 4
+        });
+        popupText.setOrigin(0.5); 
+        popupText.setDepth(15);    // 確保字體在最上層
+
+        // 文字向上飄移並淡出的動畫效果
+        this.tweens.add({
+            targets: popupText,
+            y: canY - 80,          // 向上飄移 60 像素
+            alpha: 0,              // 漸變至完全透明
+            duration: 800,         // 動畫持續 0.8 秒
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                popupText.destroy(); // 動畫播放完畢後銷毀物件，避免佔用記憶體
+            }
+        });
+        // ---------------------------------------------------
     });
 
     // 4. 碰撞邏輯：籃框 (進球判定)
@@ -102,18 +140,19 @@ function create() {
                 if (scoreText) scoreText.innerText = score;
                 statusText.innerText = "🏆 戰馬能量滿載！節點達成";
 
-                // --- 背景更換：保持擠壓模式 ---
+                // --- 修改後的更換背景邏輯 (恢復擠壓模式) ---
                 const container = document.getElementById('game-container');
                 if (container) {
                     const bgs = ['「底11.jpg', 'bg1.jpg', 'bg2.jpg', 'bg3.jpg', 'bg4.jpg', 'bg5.jpg'];
                     if (score < bgs.length) {
                         container.style.backgroundImage = `url('${bgs[score]}')`;
-                        container.style.backgroundSize = "100% 100%"; 
+                        container.style.backgroundSize = "100% 100%"; // 恢復擠壓
                         container.style.backgroundPosition = "center";
                         container.style.backgroundRepeat = "no-repeat";
                     }
                 }
 
+                // 高度 5 通關跳轉
                 if (score === 5) {
                     this.time.delayedCall(500, () => {
                         if (confirm("恭喜通關！是否接收能量？")) {
@@ -137,7 +176,7 @@ function create() {
         }
     });
 
-    // 5. 控制邏輯
+    // 5. 滑鼠與觸控控制邏輯
     this.input.on('pointerdown', (pointer) => {
         startX = pointer.x;
         startY = pointer.y;
@@ -146,34 +185,35 @@ function create() {
     });
 
     this.input.on('pointerup', (pointer) => {
+        if (!ball || !ball.active) return;
         const dx = startX - pointer.x;
         const dy = startY - pointer.y;
-        ball.body.setVelocity(dx * 3.5, (dy * 3.5) - 50);
+        
+        // 增加力量上限限制，保障遊戲操作體感
+        const forceX = Phaser.Math.Clamp(dx * 3.5, -600, 600);
+        const forceY = Phaser.Math.Clamp((dy * 3.5) - 50, -1200, -300);
+        
+        ball.body.setVelocity(forceX, forceY);
     });
 }
 
-// 罐子生成函式
+// 罐子生成函式 (包含邊界限制與防重疊機制)
 function spawnRandomCans(scene, group, sw, sh, keys, count) {
     group.clear(true, true); 
     for (let i = 0; i < count; i++) {
         let randomKey = Phaser.Utils.Array.GetRandom(keys);
         
-        // 分段生成 y 座標，確保三個罐子不會完全重疊
-        let x = Phaser.Math.Between(100, sw - 100);
-        let segmentHeight = (sh * 0.25) / count; 
+        let x = Phaser.Math.Between(80, Math.max(sw - 80, 100));
+        let segmentHeight = (sh * 0.22) / count; 
         let y = (sh * 0.38) + (segmentHeight * i) + Phaser.Math.Between(0, 20);
         
         let can = group.create(x, y, randomKey);
         if (can) {
-            // 💡 調整縮放比例為 0.08（原本 0.12 縮小一點）
-            can.setScale(0.08); 
-            
+            can.setScale(0.08); // 保持適中大小
             can.body.setAllowGravity(false);
             can.body.setImmovable(true);
-            can.setDepth(5);
-            
-            // 保持較寬鬆的碰撞判定，讓球容易收集
-            can.body.setSize(can.width * 0.8, can.height * 0.8);
+            can.setDepth(5); 
+            can.body.setSize(can.width * 0.8, can.height * 0.8); // 優化碰撞範圍
         }
     }
 }
