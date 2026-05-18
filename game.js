@@ -60,12 +60,12 @@ function create() {
         container.style.backgroundRepeat = "no-repeat";
     }
 
-    // 內部輔助：過場動畫功能 (維持你調整後的最終完美數值)
+    // 內部輔助：過場動畫功能
     const playClearTransition = (scene, currentScore) => {
         const logoImg = scene.add.image(sw / 2, sh / 2, `logo_step_${currentScore + 1}`);
         logoImg.setDepth(100); 
-        logoImg.setScale(0);   // 從 0 開始縮放
-        logoImg.setAlpha(0);   // 從透明開始
+        logoImg.setScale(0);   
+        logoImg.setAlpha(0);   
 
         // 動畫序列
         scene.tweens.add({
@@ -75,7 +75,6 @@ function create() {
             duration: 400,     
             ease: 'Back.easeOut',
             onComplete: () => {
-                // 停留後消失
                 scene.tweens.add({
                     targets: logoImg,
                     scale: 0.8, 
@@ -184,30 +183,28 @@ function create() {
             } else {
                 statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
 
-                // --- 💡 這裡新增：進球但沒過關時，在畫面中央彈出鼓勵彈幕 ---
                 let retryText = this.add.text(sw / 2, sh / 2, '再加油一下!快成功了!', {
                     fontSize: '20px',
                     fontFamily: 'Arial, sans-serif',
                     fontWeight: 'bold',
-                    fill: '#ffaa00',       // 金黃色稍橘
-                    stroke: '#331100',     // 深焦糖色邊框
+                    fill: '#ffaa00',       
+                    stroke: '#331100',     
                     strokeThickness: 4
                 });
                 retryText.setOrigin(0.5);
-                retryText.setDepth(15);    // 確保在上方
+                retryText.setDepth(15);    
 
-                // 彈幕往上飄移淡出動畫
+                // 💡 修正：縮短彈幕動畫時間至 700 毫秒，快進快出，防止連續投籃時畫面塞滿卡頓
                 this.tweens.add({
                     targets: retryText,
-                    y: (sh / 2) - 60,      // 往上飄移 60 像素
-                    alpha: 0,              // 漸變至完全透明
-                    duration: 1500,        // 持續 1 秒
+                    y: (sh / 2) - 60,      
+                    alpha: 0,              
+                    duration: 700,        
                     ease: 'Cubic.easeOut',
                     onComplete: () => {
-                        retryText.destroy(); // 銷毀物件
+                        retryText.destroy(); 
                     }
                 });
-                // -------------------------------------------------------------
 
                 this.time.delayedCall(800, () => resetBallPos());
             }
