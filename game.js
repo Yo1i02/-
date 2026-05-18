@@ -67,7 +67,6 @@ function create() {
         logoImg.setScale(0);   
         logoImg.setAlpha(0);   
 
-        // 動畫序列
         scene.tweens.add({
             targets: logoImg,
             scale: 0.5,        
@@ -105,6 +104,25 @@ function create() {
         currentBounce = 0.4; 
         ball.body.setBounce(currentBounce);
         ball.setActive(true).setVisible(true);
+    };
+
+    // 重置遊戲到高度 0 的功能
+    const restartGame = (scene) => {
+        score = 0; 
+        if (scoreText) scoreText.innerText = score;
+        
+        if (container) {
+            container.style.backgroundImage = `url('${bgs[0]}')`;
+        }
+
+        cans.clear(true, true);
+        spawnRandomCans(scene, cans, sw, sh, canKeys, 3);
+        
+        collectedCans = 0;
+        updateLights();
+        resetBallPos();
+        document.getElementById('light-basket').classList.remove('active');
+        statusText.innerText = `高度 0m：請收集能量罐`;
     };
 
     // 1. 建立感應區與罐子群組
@@ -166,19 +184,23 @@ function create() {
                         this.time.delayedCall(1000, () => {
                             if (confirm("恭喜通關！是否接收能量？")) {
                                 window.location.href = "https://www.warhorsechina.com.cn/?trk=public_post-text";
+                            } else {
+                                restartGame(this);
                             }
                         });
                     }
                 });
 
                 this.time.delayedCall(2000, () => {
-                    cans.clear(true, true); 
-                    spawnRandomCans(this, cans, sw, sh, canKeys, 3);
-                    collectedCans = 0;
-                    updateLights(); 
-                    resetBallPos();
-                    document.getElementById('light-basket').classList.remove('active');
-                    statusText.innerText = `高度 ${score}m：請收集能量罐`;
+                    if (score < 5) {
+                        cans.clear(true, true); 
+                        spawnRandomCans(this, cans, sw, sh, canKeys, 3);
+                        collectedCans = 0;
+                        updateLights(); 
+                        resetBallPos();
+                        document.getElementById('light-basket').classList.remove('active');
+                        statusText.innerText = `高度 ${score}m：請收集能量罐`;
+                    }
                 });
             } else {
                 statusText.innerText = "❌ 能量不足！請先點亮 3 顆燈";
@@ -194,19 +216,20 @@ function create() {
                 retryText.setOrigin(0.5);
                 retryText.setDepth(15);    
 
-                // 💡 修正：縮短彈幕動畫時間至 700 毫秒，快進快出，防止連續投籃時畫面塞滿卡頓
+                // 💡 調整：彈幕動畫時長拉長至 1200 毫秒（1.2 秒），顯示更完整清晰
                 this.tweens.add({
                     targets: retryText,
                     y: (sh / 2) - 60,      
                     alpha: 0,              
-                    duration: 700,        
+                    duration: 1200,        
                     ease: 'Cubic.easeOut',
                     onComplete: () => {
                         retryText.destroy(); 
                     }
                 });
 
-                this.time.delayedCall(800, () => resetBallPos());
+                // 💡 調整：球重置的時間配合彈幕往後延至 1300 毫秒（1.3 秒），確保動畫播完球才出現，節奏完美銜接！
+                this.time.delayedCall(1300, () => resetBallPos());
             }
         }
     });
