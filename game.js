@@ -70,17 +70,17 @@ function create() {
         // 動畫序列
         scene.tweens.add({
             targets: logoImg,
-            scale: 1.3,        // 💡 這裡放大了！從原本的 0.8 改為 1.3 倍（可視需求自行微調）
+            scale: 0.5,        // 💡 這裡放大了！從原本的 0.8 改為 1.3 倍（可視需求自行微調）
             alpha: 1,          // 變為不透明
-            duration: 600,     // 出現花費 0.6 秒
+            duration: 400,     // 出現花費 0.6 秒
             ease: 'Back.easeOut',
             onComplete: () => {
                 // 停留一秒後消失
                 scene.tweens.add({
                     targets: logoImg,
-                    scale: 1.6, // 💡 消失前最後膨脹的比例也同步微調大一點
+                    scale: 0.8, // 💡 消失前最後膨脹的比例也同步微調大一點
                     alpha: 0,   // 淡出
-                    delay: 800, // 停留 0.8 秒後開始淡出
+                    delay: 400, // 停留 0.8 秒後開始淡出
                     duration: 500,
                     onComplete: () => {
                         logoImg.destroy(); 
