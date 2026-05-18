@@ -201,7 +201,7 @@ function create() {
                     targets: retryText,
                     y: (sh / 2) - 60,      // 往上飄移 60 像素
                     alpha: 0,              // 漸變至完全透明
-                    duration: 1000,        // 持續 1 秒
+                    duration: 1500,        // 持續 1 秒
                     ease: 'Cubic.easeOut',
                     onComplete: () => {
                         retryText.destroy(); // 銷毀物件
